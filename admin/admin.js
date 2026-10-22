@@ -43,6 +43,11 @@ const CATEGORIAS = {
 };
 const CENTRO_DO_MAPA = [-23.454, -46.533];   // centro aproximado de Guarulhos
 
+// Aviso por e-mail para a equipe a cada mudança. Fica desligado ("") até o professor
+// publicar o script firebase/aviso-por-email.gs e colar aqui o endereço dele
+// (passo a passo em firebase/LEIA-ME.md).
+const AVISO_POR_EMAIL = "https://script.google.com/macros/s/AKfycbzuqaO9X3e2iRFZRQNuUdrd5VZSwkHB3ZBDQKkXXo4Tbc5gaoDPplHaKouWwAaBJ6i2/exec";
+
 let meuUid = null;
 let nomesDaEquipe = {};      // uid -> primeiro nome (da coleção "admins")
 let locais = [];
@@ -328,6 +333,25 @@ function criarBotao(texto, classeExtra, aoClicar) {
 // ------------------------------------------------------------
 // 6. CONFERIR E PUBLICAR, TIRAR DO AR, REMOVER
 // ------------------------------------------------------------
+
+// Pede ao script do professor que mande o e-mail para a equipe. Vai junto o "token"
+// do login, para o script confirmar que o pedido veio mesmo de um admin.
+// "no-cors": o painel só envia e não espera resposta. Se o e-mail falhar, a mudança
+// no banco continua valendo; o aviso é uma ajuda, não uma trava.
+async function avisarEquipePorEmail(acao, colecao, id, titulo) {
+  if (!AVISO_POR_EMAIL || !auth.currentUser) return;
+  try {
+    const token = await auth.currentUser.getIdToken();
+    await fetch(AVISO_POR_EMAIL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({ token, acao, colecao, id, titulo }),
+    });
+  } catch (falha) {
+    console.warn("Não consegui pedir o aviso por e-mail:", falha);
+  }
+}
+
 async function conferirEPublicar(jeito, item) {
   const ok = confirm(
     "Conferir e publicar \"" + jeito.titulo(item) + "\"?\n\n" +
@@ -343,6 +367,7 @@ async function conferirEPublicar(jeito, item) {
       ...jeito.camposDaConferencia(),
     });
     avisar("Publicado! Já aparece no app.");
+    avisarEquipePorEmail("publicou", jeito.colecao, item.id, jeito.titulo(item));
   } catch (falha) {
     avisar(explicarErro(falha), true);
   }
@@ -358,6 +383,7 @@ async function tirarDoAr(colecao, item) {
       atualizadoEm: serverTimestamp(),
     });
     avisar("Tirado do ar.");
+    avisarEquipePorEmail("tirou-do-ar", colecao, item.id, item.nome || item.titulo);
   } catch (falha) {
     avisar(explicarErro(falha), true);
   }
@@ -368,6 +394,7 @@ async function remover(colecao, item, titulo) {
   try {
     await deleteDoc(doc(banco, colecao, item.id));
     avisar("Removido.");
+    avisarEquipePorEmail("removeu", colecao, item.id, titulo);
   } catch (falha) {
     avisar(explicarErro(falha), true);
   }
@@ -441,9 +468,11 @@ formLocal.addEventListener("submit", async function (evento) {
   };
   try {
     if (localEmEdicao === null) {
-      await addDoc(collection(banco, "locais"), { ...gravar, ultimaVerificacao: "" });
+      const novo = await addDoc(collection(banco, "locais"), { ...gravar, ultimaVerificacao: "" });
+      avisarEquipePorEmail("cadastrou", "locais", novo.id, dados.nome);
     } else {
       await updateDoc(doc(banco, "locais", localEmEdicao), { ...gravar, verificadoPorUid: deleteField() });
+      avisarEquipePorEmail("editou", "locais", localEmEdicao, dados.nome);
     }
     limparFormLocal();
     avisar("Salvo. Agora outra pessoa da equipe precisa conferir e publicar.");
@@ -567,9 +596,11 @@ formNoticia.addEventListener("submit", async function (evento) {
   const gravar = { ...dados, status: "pendente", cadastradoPorUid: meuUid, atualizadoEm: serverTimestamp() };
   try {
     if (noticiaEmEdicao === null) {
-      await addDoc(collection(banco, "noticias"), gravar);
+      const nova = await addDoc(collection(banco, "noticias"), gravar);
+      avisarEquipePorEmail("cadastrou", "noticias", nova.id, dados.titulo);
     } else {
       await updateDoc(doc(banco, "noticias", noticiaEmEdicao), { ...gravar, verificadoPorUid: deleteField() });
+      avisarEquipePorEmail("editou", "noticias", noticiaEmEdicao, dados.titulo);
     }
     limparFormNoticia();
     avisar("Salva. Agora outra pessoa da equipe precisa conferir e publicar.");
