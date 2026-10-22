@@ -208,6 +208,24 @@ legend { padding: 0 6px; font-weight: bold; color: var(--ameixa); }
 
 .dica { margin: 0; color: var(--texto-suave); font-size: 14px; }
 
+/* Procurar no mapa (OpenStreetMap) */
+.linha-busca { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.linha-busca input { margin: 0; }
+.resultados { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.resultados:empty { display: none; }
+.resultado {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 10px;
+  background: var(--branco);
+}
+.resultado strong { display: block; }
+.resultado small { color: var(--texto-suave); }
+
 .botoes { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
 
 .botao {

@@ -421,6 +421,9 @@ function editarLocal(local) {
 function limparFormLocal() {
   localEmEdicao = null;
   formLocal.reset();
+  limparResultados();
+  mostrarEstado("estado-busca", "");
+  mostrarEstado("estado-endereco", "");
   $("titulo-form-local").textContent = "Novo local";
   $("erros-local").hidden = true;
   moverMarcadorDoFormulario();
@@ -539,6 +542,160 @@ function mostrarPontosNoMapa() {
     }).bindTooltip(local.nome).addTo(camadaDePontos);
   }
 }
+
+
+// ------------------------------------------------------------
+// 8b. PROCURAR NO MAPA E ACHAR ENDEREÇO (Nominatim, a busca do OpenStreetMap)
+// O Nominatim é gratuito, mas pede uso leve: no máximo 1 busca por segundo,
+// só quando alguém clica. O resultado é um PONTO DE PARTIDA: o mapa é feito
+// por voluntários e pode estar errado. Por isso nunca preenchemos o telefone
+// e o link da fonte oficial continua obrigatório para publicar.
+// ------------------------------------------------------------
+const NOMINATIM = "https://nominatim.openstreetmap.org/search";
+let ultimaBusca = 0;
+let camadaDeResultados = null;
+
+async function buscarNoNominatim(parametros) {
+  const espera = ultimaBusca + 1100 - Date.now();       // respeita 1 busca por segundo
+  if (espera > 0) await new Promise(function (pronto) { setTimeout(pronto, espera); });
+  ultimaBusca = Date.now();
+  const endereco = NOMINATIM + "?" + new URLSearchParams({
+    format: "jsonv2", addressdetails: "1", countrycodes: "br", "accept-language": "pt-BR", ...parametros,
+  });
+  const resposta = await fetch(endereco);
+  if (!resposta.ok) throw new Error("Nominatim respondeu " + resposta.status);
+  return resposta.json();
+}
+
+// Região que aparece no mapa, no formato que o Nominatim pede: oeste,norte,leste,sul.
+// Com o mapa muito aproximado, a busca olharia só umas ruas: aí usamos um
+// quadrado de 16 km em volta do centro do mapa.
+function regiaoDoMapa() {
+  if (!mapa) return null;
+  const limites = mapa.getZoom() >= 14 ? mapa.getCenter().toBounds(16000) : mapa.getBounds();
+  return [limites.getWest(), limites.getNorth(), limites.getEast(), limites.getSouth()]
+    .map(function (n) { return n.toFixed(5); }).join(",");
+}
+
+// Do resultado do Nominatim, monta "Rua X, 123" e o bairro
+function enderecoDoResultado(resultado) {
+  const a = resultado.address || {};
+  const rua = [a.road || a.pedestrian || "", a.house_number || ""].filter(Boolean).join(", ");
+  return {
+    endereco: rua,
+    bairro: a.suburb || a.neighbourhood || a.city_district || a.quarter || "",
+    cidade: a.city || a.town || a.village || "",
+  };
+}
+
+function usarResultado(resultado) {
+  const partes = enderecoDoResultado(resultado);
+  if (resultado.name) formLocal.elements.nome.value = resultado.name;
+  if (partes.endereco) formLocal.elements.endereco.value = partes.endereco;
+  if (partes.bairro) formLocal.elements.bairro.value = partes.bairro;
+  formLocal.elements.latitude.value = Number(resultado.lat).toFixed(6);
+  formLocal.elements.longitude.value = Number(resultado.lon).toFixed(6);
+  moverMarcadorDoFormulario();
+  limparResultados();
+  mostrarEstado("estado-busca",
+    "Preenchido com os dados do mapa. Agora confira nome, endereço e telefone na fonte oficial " +
+    "e cole o link dela antes de salvar.");
+}
+
+function limparResultados() {
+  $("resultados-lugares").replaceChildren();
+  if (camadaDeResultados) camadaDeResultados.clearLayers();
+}
+
+function mostrarEstado(id, texto) {
+  $(id).textContent = texto;
+  $(id).hidden = !texto;
+}
+
+async function procurarLugares() {
+  const termo = $("termo-lugares").value.trim();
+  if (termo.length < 3) { mostrarEstado("estado-busca", "Digite pelo menos 3 letras."); return; }
+  const regiao = regiaoDoMapa();
+  if (!regiao) { mostrarEstado("estado-busca", "O mapa não carregou, então não sei onde procurar."); return; }
+
+  limparResultados();
+  mostrarEstado("estado-busca", "Procurando…");
+  $("procurar-lugares").disabled = true;
+  try {
+    const resultados = await buscarNoNominatim({ q: termo, viewbox: regiao, bounded: "1", limit: "10" });
+    if (resultados.length === 0) {
+      mostrarEstado("estado-busca", "Nada encontrado nesta região. Tente outra palavra ou afaste o mapa (zoom −).");
+      return;
+    }
+    mostrarEstado("estado-busca", resultados.length + " encontrado(s). Toque em \"Usar\" para preencher o formulário.");
+    if (!camadaDeResultados) camadaDeResultados = L.layerGroup().addTo(mapa);
+    const pontos = [];
+    for (const resultado of resultados) {
+      const partes = enderecoDoResultado(resultado);
+      const nome = resultado.name || resultado.display_name.split(",")[0];
+
+      const item = document.createElement("li");
+      item.className = "resultado";
+      const texto = document.createElement("span");
+      const titulo = document.createElement("strong");
+      titulo.textContent = nome;
+      const detalhe = document.createElement("small");
+      detalhe.textContent = [partes.endereco, partes.bairro, partes.cidade].filter(Boolean).join(" · ") || resultado.display_name;
+      texto.append(titulo, detalhe);
+      item.append(texto, criarBotao("Usar", "botao-claro", function () { usarResultado(resultado); }));
+      $("resultados-lugares").append(item);
+
+      const ponto = [Number(resultado.lat), Number(resultado.lon)];
+      pontos.push(ponto);
+      L.circleMarker(ponto, { radius: 8, color: "#ffffff", weight: 2, fillColor: "#e0a23a", fillOpacity: 1 })
+        .bindTooltip(nome)
+        .on("click", function () { usarResultado(resultado); })
+        .addTo(camadaDeResultados);
+    }
+    mapa.fitBounds(pontos, { padding: [30, 30], maxZoom: 16 });
+  } catch (falha) {
+    console.error(falha);
+    mostrarEstado("estado-busca", "Não consegui procurar agora (sem internet ou o serviço do mapa não respondeu).");
+  } finally {
+    $("procurar-lugares").disabled = false;
+  }
+}
+
+async function acharEndereco() {
+  const endereco = formLocal.elements.endereco.value.trim();
+  if (!endereco) { mostrarEstado("estado-endereco", "Digite o endereço primeiro."); return; }
+  const bairro = formLocal.elements.bairro.value.trim();
+  mostrarEstado("estado-endereco", "Procurando o endereço…");
+  $("achar-endereco").disabled = true;
+  try {
+    // A região do mapa entra como preferência (bounded=0), não como limite
+    const parametros = { q: [endereco, bairro].filter(Boolean).join(", "), limit: "1" };
+    const regiao = regiaoDoMapa();
+    if (regiao) parametros.viewbox = regiao;
+    const [achado] = await buscarNoNominatim(parametros);
+    if (!achado) {
+      mostrarEstado("estado-endereco", "Não achei esse endereço. Confira a escrita ou clique no mapa no lugar certo.");
+      return;
+    }
+    formLocal.elements.latitude.value = Number(achado.lat).toFixed(6);
+    formLocal.elements.longitude.value = Number(achado.lon).toFixed(6);
+    moverMarcadorDoFormulario();
+    mostrarEstado("estado-endereco",
+      "Achei: " + achado.display_name + ". Confira o ponto rosa no mapa. Se estiver errado, clique no lugar certo.");
+  } catch (falha) {
+    console.error(falha);
+    mostrarEstado("estado-endereco", "Não consegui procurar agora (sem internet ou o serviço do mapa não respondeu).");
+  } finally {
+    $("achar-endereco").disabled = false;
+  }
+}
+
+$("procurar-lugares").addEventListener("click", procurarLugares);
+$("achar-endereco").addEventListener("click", acharEndereco);
+// Enter no campo de busca procura, em vez de salvar o formulário inteiro
+$("termo-lugares").addEventListener("keydown", function (evento) {
+  if (evento.key === "Enter") { evento.preventDefault(); procurarLugares(); }
+});
 
 
 // ------------------------------------------------------------

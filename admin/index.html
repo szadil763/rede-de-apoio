@@ -79,6 +79,21 @@
         <form id="form-local" class="formulario" novalidate>
           <h2 id="titulo-form-local">Novo local</h2>
 
+          <!-- Busca no OpenStreetMap: só um ponto de partida, nunca a fonte oficial -->
+          <fieldset class="procurar-lugares">
+            <legend>Procurar no mapa (opcional)</legend>
+            <p class="dica">Digite, por exemplo, <em>delegacia</em>, <em>CRAS</em> ou <em>hospital</em>.
+              A busca olha a região que aparece no mapa abaixo (mova ou dê zoom para mudar).</p>
+            <div class="linha-busca">
+              <input id="termo-lugares" type="search" placeholder="delegacia, CRAS, hospital…"
+                autocomplete="off" aria-label="O que procurar no mapa">
+              <button type="button" id="procurar-lugares" class="botao">Procurar</button>
+            </div>
+            <p id="estado-busca" class="dica" role="status" hidden></p>
+            <ul id="resultados-lugares" class="resultados"></ul>
+          </fieldset>
+
+
           <label>Nome oficial do serviço *<input name="nome" required maxlength="150"></label>
           <label>Categoria *
             <select name="categoria" required>
@@ -92,6 +107,10 @@
           </label>
           <label>Endereço *<input name="endereco" required maxlength="200"></label>
           <label>Bairro<input name="bairro" maxlength="80"></label>
+          <div class="botoes">
+            <button type="button" id="achar-endereco" class="botao botao-claro">Achar este endereço no mapa</button>
+          </div>
+          <p id="estado-endereco" class="dica" role="status" hidden></p>
 
           <fieldset>
             <legend>Posição no mapa</legend>
@@ -185,6 +204,11 @@
       <h3>Aviso por e-mail</h3>
       <p>Quando o professor liga o aviso, cada mudança feita aqui manda um e-mail para a equipe, com o
         que mudou e quem mudou. Recebeu e não reconhece a mudança? Avise o professor.</p>
+      <h3>Procurar no mapa e achar endereço</h3>
+      <p>Essas buscas usam o <strong>OpenStreetMap</strong>, um mapa feito por voluntários. Ele ajuda a
+        começar, mas pode estar errado ou desatualizado: <strong>confira tudo na fonte oficial</strong>.
+        O telefone nunca vem do mapa; copie da fonte oficial. O OpenStreetMap vê o que foi buscado e o
+        endereço de internet de quem buscou (só da equipe, nunca das usuárias do app).</p>
       <h3>Novos administradores</h3>
       <p>Só o professor adiciona, pelo console do Firebase (passo a passo em <code>firebase/LEIA-ME.md</code>).</p>
     </section>
