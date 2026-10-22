@@ -14,6 +14,11 @@ const PAGINA_NEUTRA = "https://www.google.com/";
 // Enquanto estiver vazio, o app mostra uma orientação no lugar do botão.
 const CANAL_DA_EQUIPE = "";
 
+// Contador de acessos (GoatCounter): endereço do painel criado pelo professor.
+// Exemplo: "https://rededeapoio.goatcounter.com". Vazio = contador desligado.
+// Ver a aba "Acessos" do painel do administrador (admin/index.html).
+const CONTADOR_DE_ACESSOS = "";
+
 // Depois de quantos meses sem conferência um local é considerado desatualizado.
 const MESES_PARA_DESATUALIZAR = 6;
 
@@ -945,6 +950,26 @@ if ("serviceWorker" in navigator) {
 
 
 // ------------------------------------------------------------
+// 12. CONTADOR DE ACESSOS
+// Conta só UMA coisa: "o app foi aberto". Nada sobre a pessoa: não conta o
+// que ela busca, quais locais abre, nem onde está. Sem cookies.
+// Usamos uma "imagem invisível" em vez de carregar o código de outro site:
+// assim nenhum programa de fora roda dentro do nosso app.
+// ------------------------------------------------------------
+function contarAcesso() {
+  if (!linkSeguro(CONTADOR_DE_ACESSOS)) return;          // contador desligado
+  if (NO_COMPUTADOR || MODO_DEMONSTRACAO) return;        // testes não contam
+  if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return; // pediu para não ser rastreada
+  if (!navigator.onLine) return;
+  const contagem = new Image();
+  contagem.referrerPolicy = "no-referrer";
+  contagem.src = CONTADOR_DE_ACESSOS.replace(/\/$/, "") + "/count?p=" + encodeURIComponent("/app-aberto") +
+    "&t=" + encodeURIComponent("App aberto");
+}
+
+
+// ------------------------------------------------------------
 // COMEÇO: quando a página abre, já buscamos os locais.
 // ------------------------------------------------------------
 carregarLocais();
+contarAcesso();
