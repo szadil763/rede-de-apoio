@@ -543,6 +543,16 @@ select:focus-visible {
   z-index: 0;           /* o mapa fica embaixo da barra do topo */
 }
 
+/* Botões + e − do mapa. O Leaflet traz 30px; o mínimo confortável para o dedo é 44px.
+   Esta regra vence a do Leaflet porque o nosso CSS é carregado depois (a "cascata"). */
+.leaflet-touch .leaflet-bar a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  font-size: 24px;
+  color: var(--ameixa);
+}
+
 /* Marcador em forma de gota, com o ícone da categoria */
 .pino {
   position: relative;
@@ -968,13 +978,23 @@ select:focus-visible {
 }
 
 .bloco-privacidade p,
-.bloco-privacidade ul {
+.bloco-privacidade ul,
+.bloco-privacidade ol {
   margin: 0;
   font-size: 16px;
 }
 
-.bloco-privacidade ul {
+.bloco-privacidade ul,
+.bloco-privacidade ol {
   padding-left: 20px;
+}
+
+.bloco-privacidade li + li {
+  margin-top: 4px;
+}
+
+#botao-instalar {
+  margin-bottom: 14px;
 }
 
 /* ============================================================

@@ -1038,6 +1038,43 @@ if ("serviceWorker" in navigator) {
 
 
 // ------------------------------------------------------------
+// 11b. COLOCAR NA TELA DO CELULAR (instalar o app)
+// No Android, o Chrome avisa quando o app pode ser instalado: é o evento
+// "beforeinstallprompt". Guardamos esse aviso e só abrimos a janela de
+// instalação quando a pessoa tocar em "Instalar agora" (ela decide).
+// No iPhone não existe esse aviso; a tela mostra o passo a passo.
+// ------------------------------------------------------------
+let pedidoDeInstalacao = null;
+
+function esconderConviteParaInstalar() {
+  for (const id of ["atalho-instalar", "cartao-instalar", "botao-instalar"]) {
+    document.getElementById(id).hidden = true;
+  }
+}
+
+// Já está instalado (aberto pelo ícone)? Então não oferecemos instalar de novo.
+if (matchMedia("(display-mode: standalone)").matches || navigator.standalone === true) {
+  esconderConviteParaInstalar();
+}
+
+window.addEventListener("beforeinstallprompt", function (evento) {
+  evento.preventDefault();          // sem convite automático na tela
+  pedidoDeInstalacao = evento;
+  document.getElementById("botao-instalar").hidden = false;
+});
+
+document.getElementById("botao-instalar").addEventListener("click", async function () {
+  if (!pedidoDeInstalacao) return;
+  pedidoDeInstalacao.prompt();      // abre a janela do Chrome: "Instalar app?"
+  await pedidoDeInstalacao.userChoice;
+  pedidoDeInstalacao = null;        // o aviso só pode ser usado uma vez
+  document.getElementById("botao-instalar").hidden = true;
+});
+
+window.addEventListener("appinstalled", esconderConviteParaInstalar);
+
+
+// ------------------------------------------------------------
 // 12. CONTADOR DE ACESSOS
 // Conta só UMA coisa: "o app foi aberto". Nada sobre a pessoa: não conta o
 // que ela busca, quais locais abre, nem onde está. Sem cookies.

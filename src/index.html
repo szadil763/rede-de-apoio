@@ -84,6 +84,7 @@
           <button type="button" data-ir-para="tela-menu"><span class="icone" data-icone="inicio"></span>Entrar no app</button>
           <button type="button" data-ir-para="tela-noticias"><span class="icone" data-icone="noticias"></span>Notícias</button>
           <button type="button" data-ir-para="tela-privacidade"><span class="icone" data-icone="escudo"></span>Privacidade</button>
+          <button id="atalho-instalar" type="button" data-ir-para="tela-instalar"><span class="icone" data-icone="celular"></span>Instalar</button>
         </nav>
       </div>
       <div class="onda onda-base" aria-hidden="true"></div>
@@ -110,6 +111,10 @@
         <button class="cartao-menu" type="button" data-ir-para="tela-privacidade">
           <span class="icone-redondo" data-icone="escudo"></span>
           <span><strong>Privacidade e segurança</strong><small>O que o app guarda (e o que não guarda)</small></span>
+        </button>
+        <button id="cartao-instalar" class="cartao-menu" type="button" data-ir-para="tela-instalar">
+          <span class="icone-redondo" data-icone="celular"></span>
+          <span><strong>Colocar na tela do celular</strong><small>Abrir com um toque, até sem internet</small></span>
         </button>
       </nav>
     </section>
@@ -249,6 +254,44 @@
          Pedido da equipe (21/10): explicar com linguagem simples, sem
          prometer sigilo absoluto.
          ============================================================ -->
+    <!-- ============================================================
+         TELA: COLOCAR NA TELA DO CELULAR (instalar o app, PWA)
+         No Android aparece o botão "Instalar agora". No iPhone não existe
+         esse botão: a pessoa segue o passo a passo.
+         ============================================================ -->
+    <section id="tela-instalar" class="tela" data-frase="Ajuda à mão, quando você precisar." hidden>
+      <button class="botao-voltar" type="button" data-ir-para="tela-menu">← Voltar</button>
+      <h2>Colocar na tela do celular</h2>
+      <p>Assim o app abre com um toque, e a lista de locais e os telefones funcionam até sem
+        internet. Na tela do celular aparece só o nome "Rede de Apoio".</p>
+
+      <button id="botao-instalar" class="botao-grande botao-escuro" type="button" hidden>
+        <span class="icone" data-icone="celular"></span> Instalar agora
+      </button>
+
+      <div class="bloco-privacidade">
+        <h3>No Android (Chrome)</h3>
+        <ol>
+          <li>Toque nos três pontinhos <strong>⋮</strong>, no alto à direita.</li>
+          <li>Toque em <strong>Instalar app</strong> ou <strong>Adicionar à tela inicial</strong>.</li>
+          <li>Confirme.</li>
+        </ol>
+      </div>
+      <div class="bloco-privacidade">
+        <h3>No iPhone</h3>
+        <ol>
+          <li>Abra este endereço no <strong>Safari</strong>.</li>
+          <li>Toque no botão <strong>Compartilhar</strong> (o quadrado com uma seta para cima).</li>
+          <li>Toque em <strong>Adicionar à Tela de Início</strong> e depois em <strong>Adicionar</strong>.</li>
+        </ol>
+      </div>
+      <div class="bloco-privacidade">
+        <h3>Antes, pense na sua segurança</h3>
+        <p>Se outra pessoa mexe no seu celular, um ícone novo pode chamar atenção. Você também pode
+          usar o app sem instalar, pelo navegador, numa aba anônima.</p>
+      </div>
+    </section>
+
     <section id="tela-privacidade" class="tela" data-frase="Você merece viver com segurança e respeito." hidden>
       <button class="botao-voltar" type="button" data-ir-para="tela-menu">← Voltar</button>
       <h2>Privacidade e segurança</h2>
