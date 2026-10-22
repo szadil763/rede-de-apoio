@@ -13,7 +13,7 @@
 // ============================================================
 
 // Troque o número quando mudar a lista abaixo, para o aparelho baixar de novo.
-const NOME_DA_COPIA = "rede-de-apoio-v2";
+const NOME_DA_COPIA = "rede-de-apoio-v3";
 
 // Arquivos guardados assim que o app é aberto pela primeira vez.
 const ARQUIVOS_ESSENCIAIS = [
@@ -22,6 +22,7 @@ const ARQUIVOS_ESSENCIAIS = [
   "./estilos.css",
   "./app.js",
   "./icones.js",
+  "./config-firebase.js",
   "./fontes/archivo-black.woff2",
   "./manifest.webmanifest",
   "./icones/icone-192.png",
@@ -47,7 +48,7 @@ self.addEventListener("activate", function (evento) {
     caches.keys().then(function (nomes) {
       return Promise.all(
         nomes
-          .filter(function (nome) { return nome !== NOME_DA_COPIA; })
+          .filter(function (nome) { return nome !== NOME_DA_COPIA && nome !== "rede-de-apoio-dados"; })
           .map(function (nome) { return caches.delete(nome); })
       );
     })

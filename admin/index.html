@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Área da equipe — Rede de Apoio</title>
+  <link rel="stylesheet" href="../src/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!--
+    ÁREA DO ADMINISTRADOR (decisão 6, com Firebase)
+    O login é de verdade (Firebase Authentication) e quem decide o que cada um pode fazer
+    são as regras do banco de dados (firebase/firestore.rules), no servidor do Google.
+    Por isso esta página pode ficar no site: sem conta de administrador, ela não faz nada.
+  -->
+  <header class="topo">
+    <div>
+      <h1>Área da equipe</h1>
+      <p id="subtitulo">Rede de Apoio · acesso só para administradores</p>
+    </div>
+    <div class="topo-botoes" id="topo-botoes" hidden>
+      <button type="button" id="ir-inicio" class="botao botao-claro">Início</button>
+      <button type="button" id="sair-admin" class="botao botao-claro">Sair</button>
+    </div>
+  </header>
+
+  <!-- ===================== CARREGANDO ===================== -->
+  <section id="tela-carregando" class="tela-central">
+    <p>Carregando…</p>
+  </section>
+
+  <!-- ===================== ENTRADA (LOGIN) ===================== -->
+  <section id="tela-login" class="tela-central" hidden>
+    <form id="form-login" class="cartao-central" novalidate>
+      <h2>Entrar como administrador</h2>
+      <label>E-mail<input type="email" id="campo-email" autocomplete="username" required></label>
+      <label>Senha<input type="password" id="campo-senha" autocomplete="current-password" required></label>
+      <div id="erro-login" class="erros" role="alert" hidden></div>
+      <button type="submit" class="botao botao-grande">Entrar</button>
+      <button type="button" id="esqueci-senha" class="link-botao">Esqueci a senha</button>
+      <p class="dica">Em computador compartilhado, a sessão termina quando a aba é fechada.</p>
+    </form>
+  </section>
+
+  <!-- ===================== INÍCIO DO ADMINISTRADOR ===================== -->
+  <section id="tela-inicio-admin" class="tela-central" hidden>
+    <div class="cartao-central">
+      <h2 id="ola">Olá!</h2>
+      <p class="dica">O que você quer fazer?</p>
+      <button type="button" id="abrir-painel" class="botao botao-grande">Painel do administrador
+        <small>Cadastrar e conferir locais e notícias, ver acessos</small></button>
+      <a id="abrir-app" class="botao botao-grande botao-rosa" href="../src/" target="_blank" rel="noopener">Abrir o app
+        <small>O app como as usuárias veem (abre em outra aba)</small></a>
+    </div>
+  </section>
+
+  <div id="area-painel" hidden>
+  <nav class="abas" role="tablist" aria-label="Seções do painel">
+    <button type="button" role="tab" data-aba="aba-locais" aria-selected="true">Locais</button>
+    <button type="button" role="tab" data-aba="aba-noticias" aria-selected="false">Notícias</button>
+    <button type="button" role="tab" data-aba="aba-acessos" aria-selected="false">Acessos</button>
+    <button type="button" role="tab" data-aba="aba-ajuda" aria-selected="false">Como funciona</button>
+  </nav>
+
+  <main>
+    <div id="aviso-geral" class="aviso" role="status" hidden></div>
+
+    <!-- ===================== LOCAIS ===================== -->
+    <section id="aba-locais" class="aba" role="tabpanel">
+      <div class="duas-colunas">
+        <div>
+          <h2>Locais <span id="contagem-locais" class="contagem"></span></h2>
+          <ul id="lista-locais" class="lista"></ul>
+          <button type="button" id="novo-local" class="botao">+ Novo local</button>
+        </div>
+
+        <form id="form-local" class="formulario" novalidate>
+          <h2 id="titulo-form-local">Novo local</h2>
+
+          <label>Nome oficial do serviço *<input name="nome" required maxlength="150"></label>
+          <label>Categoria *
+            <select name="categoria" required>
+              <option value="">Escolha…</option>
+              <option value="delegacia-da-mulher">Delegacia da Mulher</option>
+              <option value="centro-de-referencia">Centro de Referência (acolhimento)</option>
+              <option value="hospital">Hospital / saúde</option>
+              <option value="cras-creas">Assistência Social (CRAS/CREAS)</option>
+              <option value="defensoria">Defensoria Pública (jurídico)</option>
+            </select>
+          </label>
+          <label>Endereço *<input name="endereco" required maxlength="200"></label>
+          <label>Bairro<input name="bairro" maxlength="80"></label>
+
+          <fieldset>
+            <legend>Posição no mapa</legend>
+            <p class="dica">Clique no mapa no ponto exato do local, ou digite os números.</p>
+            <div id="mapa-admin" class="mapa-admin"></div>
+            <div class="lado-a-lado">
+              <label>Latitude<input name="latitude" inputmode="decimal" placeholder="-23.4"></label>
+              <label>Longitude<input name="longitude" inputmode="decimal" placeholder="-46.5"></label>
+            </div>
+          </fieldset>
+
+          <label>Telefone (só canais públicos e oficiais)<input name="telefone" inputmode="tel" maxlength="30"></label>
+          <label>Horário (ex.: 24 horas)<input name="horario" maxlength="120"></label>
+          <label>O que oferece (uma linha, linguagem simples)<input name="oQueOferece" maxlength="200"></label>
+          <label>Link da fonte oficial (obrigatório para publicar)<input name="fonte" type="url" placeholder="https://…"></label>
+
+          <p class="dica">Ao salvar, o local fica <strong>esperando conferência</strong>. Outra pessoa
+            da equipe confere na fonte oficial e publica.</p>
+          <div id="erros-local" class="erros" role="alert" hidden></div>
+          <div class="botoes">
+            <button type="submit" class="botao">Salvar</button>
+            <button type="button" id="cancelar-local" class="botao botao-claro">Limpar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================== NOTÍCIAS ===================== -->
+    <section id="aba-noticias" class="aba" role="tabpanel" hidden>
+      <div class="duas-colunas">
+        <div>
+          <h2>Notícias <span id="contagem-noticias" class="contagem"></span></h2>
+          <ul id="lista-noticias" class="lista"></ul>
+          <button type="button" id="nova-noticia" class="botao">+ Nova notícia</button>
+        </div>
+
+        <form id="form-noticia" class="formulario" novalidate>
+          <h2 id="titulo-form-noticia">Nova notícia</h2>
+          <label>Título *<input name="titulo" required maxlength="200"></label>
+          <label>Tema (vira filtro no app; ex.: Direitos, Saúde, Serviços)<input name="tema" maxlength="40"></label>
+          <label>Fonte (nome do site) *<input name="fonte" required maxlength="100"></label>
+          <label>Link da matéria (obrigatório para publicar)<input name="link" type="url" placeholder="https://…"></label>
+          <label>Data da matéria<input name="data" type="date"></label>
+          <label>Resumo (1 ou 2 frases, sem detalhes violentos; obrigatório para publicar)
+            <textarea name="resumo" rows="3" maxlength="300"></textarea>
+          </label>
+          <p class="dica">Sem fotos e sem relatos gráficos. O final "?utm_source=…" do link é tirado sozinho.</p>
+          <div id="erros-noticia" class="erros" role="alert" hidden></div>
+          <div class="botoes">
+            <button type="submit" class="botao">Salvar</button>
+            <button type="button" id="cancelar-noticia" class="botao botao-claro">Limpar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===================== ACESSOS ===================== -->
+    <section id="aba-acessos" class="aba" role="tabpanel" hidden>
+      <h2>Quantas pessoas abrem o app</h2>
+      <p>
+        O app conta <strong>quantas vezes ele é aberto</strong>, usando o serviço gratuito
+        <strong>GoatCounter</strong>: sem cookies e sem cadastro. Ele <strong>não</strong> conta o que a
+        pessoa busca, quais locais abre, nem onde ela está.
+      </p>
+      <div id="estado-contador" class="aviso"></div>
+      <h3>Como ligar o contador (uma vez só, feito pelo professor)</h3>
+      <ol>
+        <li>Crie uma conta em <a href="https://www.goatcounter.com/signup" target="_blank" rel="noopener">goatcounter.com/signup</a>
+          com o e-mail da escola. Em "Code", escolha um nome discreto (ex.: <code>rededeapoio</code>).</li>
+        <li>Mande o endereço (ex.: <code>https://rededeapoio.goatcounter.com</code>) para quem programa o app
+          preencher <code>CONTADOR_DE_ACESSOS</code> no <code>src/app.js</code>.</li>
+        <li>O painel do GoatCounter mostra os acessos por dia, semana e mês.</li>
+      </ol>
+    </section>
+
+    <!-- ===================== AJUDA ===================== -->
+    <section id="aba-ajuda" class="aba" role="tabpanel" hidden>
+      <h2>Como funciona</h2>
+      <ol>
+        <li><strong>Cadastrar:</strong> preencha o formulário com informação de fonte oficial e salve.
+          O item fica <span class="estado pendente">esperando conferência</span> e ainda não aparece no app.</li>
+        <li><strong>Conferir:</strong> <em>outra pessoa</em> da equipe abre a fonte oficial (ou liga para o
+          serviço), confere nome, endereço e telefone, e toca em <strong>Conferir e publicar</strong>.</li>
+        <li><strong>No ar:</strong> o item fica <span class="estado pronto">publicado</span> e aparece no app
+          em segundos.</li>
+        <li><strong>Mudou algo?</strong> Ao editar um item publicado, ele sai do ar e volta a esperar
+          conferência. Para tirar do ar sem editar, use <strong>Tirar do ar</strong>.</li>
+      </ol>
+      <p>Essas regras não dependem desta página: o próprio Firebase recusa, por exemplo, que a mesma
+        pessoa cadastre e publique.</p>
+      <h3>Novos administradores</h3>
+      <p>Só o professor adiciona, pelo console do Firebase (passo a passo em <code>firebase/LEIA-ME.md</code>).</p>
+    </section>
+  </main>
+  </div>
+
+  <script src="../src/vendor/leaflet/leaflet.js"></script>
+  <script src="../src/config-firebase.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

@@ -282,6 +282,16 @@
       </div>
 
       <div class="bloco-privacidade">
+        <h3>De onde vêm os locais e as notícias</h3>
+        <p>
+          A lista de locais e as notícias ficam guardadas no Firebase, um serviço do Google.
+          Ao abrir o app, ele busca essa lista pública. O Google recebe dados técnicos da
+          conexão, como em qualquer site, mas o app não envia nada sobre você: nem o que você
+          busca, nem a sua localização.
+        </p>
+      </div>
+
+      <div class="bloco-privacidade">
         <h3>Contagem de acessos</h3>
         <p>
           Para saber se o app está ajudando, a equipe pode contar quantas vezes ele é aberto,
@@ -334,6 +344,7 @@
   <!-- A biblioteca do mapa precisa vir ANTES do nosso código, que usa ela -->
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="icones.js"></script>
+  <script src="config-firebase.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

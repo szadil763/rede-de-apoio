@@ -140,11 +140,8 @@ document.addEventListener("keydown", function (evento) {
 // ------------------------------------------------------------
 async function carregarLocais() {
   try {
-    const resposta = await fetch(ARQUIVO_DE_LOCAIS);
-    if (!resposta.ok) {
-      throw new Error("Arquivo não encontrado (código " + resposta.status + ")");
-    }
-    listaDeLocais = await resposta.json();
+    listaDeLocais = await buscarPublicados("locais", ARQUIVO_DE_LOCAIS);
+    listaDeLocais.sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), "pt-BR"); });
   } catch (erro) {
     // console.error mostra o erro para quem está programando (F12 no navegador)
     console.error("Não foi possível carregar os locais:", erro);
@@ -158,6 +155,98 @@ async function carregarLocais() {
   criarFiltros();
   criarListaDeBairros();
   atualizarLocais();
+}
+
+
+// ------------------------------------------------------------
+// 3b. DE ONDE VÊM OS DADOS
+// Com o Firebase: o app pede ao banco de dados SÓ o que já foi conferido e
+// publicado (as regras do servidor não deixam ver o resto). Depois guarda uma
+// cópia no celular, para funcionar sem internet.
+// Sem o Firebase (modo demonstração, versão de teste): usa os arquivos .json.
+// ------------------------------------------------------------
+const USAR_FIREBASE = typeof CONFIG_DO_FIREBASE !== "undefined" && !MODO_DEMONSTRACAO;
+const NOME_DA_COPIA_DE_DADOS = "rede-de-apoio-dados";
+
+async function buscarPublicados(colecao, arquivoReserva) {
+  if (USAR_FIREBASE) {
+    try {
+      const lista = await buscarNoFirebase(colecao);
+      guardarCopia(colecao, lista);
+      return lista;
+    } catch (erro) {
+      console.error("Firebase indisponível, usando a cópia guardada:", erro);
+      const copia = await lerCopia(colecao);
+      if (copia) return copia;
+    }
+  }
+  const resposta = await fetch(arquivoReserva);
+  if (!resposta.ok) throw new Error("Arquivo não encontrado (código " + resposta.status + ")");
+  return resposta.json();
+}
+
+// Pergunta ao Firestore (pela internet, sem biblioteca) os itens com status "publicado"
+async function buscarNoFirebase(colecao) {
+  const endereco = "https://firestore.googleapis.com/v1/projects/" + CONFIG_DO_FIREBASE.projectId +
+    "/databases/(default)/documents:runQuery?key=" + CONFIG_DO_FIREBASE.apiKey;
+  const tempo = new AbortController();
+  const relogio = setTimeout(function () { tempo.abort(); }, 10000);   // desiste depois de 10 segundos
+  try {
+    const resposta = await fetch(endereco, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: colecao }],
+          where: { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: "publicado" } } },
+        },
+      }),
+      signal: tempo.signal,
+      referrerPolicy: "no-referrer",
+    });
+    if (!resposta.ok) throw new Error("Firebase respondeu " + resposta.status);
+    const resultados = await resposta.json();
+    return resultados
+      .filter(function (r) { return r.document; })
+      .map(function (r) {
+        const item = { id: r.document.name.split("/").pop() };
+        for (const [campo, valor] of Object.entries(r.document.fields || {})) {
+          item[campo] = valorDoFirestore(valor);
+        }
+        return item;
+      });
+  } finally {
+    clearTimeout(relogio);
+  }
+}
+
+// O Firestore manda cada valor com o "tipo" junto: { stringValue: "texto" }, { doubleValue: -23.4 }...
+function valorDoFirestore(valor) {
+  if ("stringValue" in valor) return valor.stringValue;
+  if ("doubleValue" in valor) return Number(valor.doubleValue);
+  if ("integerValue" in valor) return Number(valor.integerValue);
+  if ("booleanValue" in valor) return valor.booleanValue;
+  if ("timestampValue" in valor) return valor.timestampValue;
+  if ("nullValue" in valor) return null;
+  return "";
+}
+
+// A cópia fica no "cache" do navegador: é só a lista pública, nada sobre a pessoa.
+async function guardarCopia(colecao, lista) {
+  try {
+    const copia = await caches.open(NOME_DA_COPIA_DE_DADOS);
+    await copia.put("/copia/" + colecao, new Response(JSON.stringify(lista)));
+  } catch (erro) { /* sem cache (ex.: navegação privada): tudo bem */ }
+}
+
+async function lerCopia(colecao) {
+  try {
+    const copia = await caches.open(NOME_DA_COPIA_DE_DADOS);
+    const guardada = await copia.match("/copia/" + colecao);
+    return guardada ? guardada.json() : null;
+  } catch (erro) {
+    return null;
+  }
 }
 
 
@@ -820,9 +909,8 @@ async function carregarNoticias() {
   aviso.hidden = true;
 
   try {
-    const resposta = await fetch(ARQUIVO_DE_NOTICIAS);
-    if (!resposta.ok) throw new Error("código " + resposta.status);
-    listaDeNoticias = await resposta.json();
+    listaDeNoticias = await buscarPublicados("noticias", ARQUIVO_DE_NOTICIAS);
+    listaDeNoticias.sort(function (a, b) { return String(b.data || "").localeCompare(String(a.data || "")); });
   } catch (erro) {
     console.error("Não foi possível carregar as notícias:", erro);
     textoDoAviso.textContent = "Conteúdo temporariamente indisponível.";
