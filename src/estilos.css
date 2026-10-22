@@ -1,0 +1,1042 @@
+/* ============================================================
+   FONTE DO LETREIRO
+   "Archivo Black" é uma fonte gratuita (licença OFL), guardada dentro
+   do projeto (pasta fontes/) para funcionar sem internet e sem avisar
+   nenhum outro site. Usada só nos títulos, como nos rascunhos.
+   ============================================================ */
+@font-face {
+  font-family: "Archivo Black";
+  src: url("fontes/archivo-black.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* ============================================================
+   CORES DO APP (tiradas dos rascunhos da equipe)
+   Ficam guardadas em "variáveis" (--nome). Para trocar uma cor no app
+   inteiro, basta mudar aqui. Cores da ficha: bege, roxo e rosa.
+   ============================================================ */
+:root {
+  --bege: #f6e9e2;
+  --bege-escuro: #ead3c8;
+  --ameixa: #3a173d;        /* roxo bem escuro: letreiro, botões principais */
+  --roxo: #5b2a6e;
+  --roxo-claro: #8a5a9e;
+  --rosa: #c2457a;
+  --rosa-claro: #f3d3e1;
+  --texto: #2d1630;
+  --texto-suave: #6b5470;
+  --branco: #ffffff;
+  --vermelho: #b3261e;
+  --fonte-titulo: "Archivo Black", "Arial Black", Impact, sans-serif;
+  --fonte-texto: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ============================================================
+   BASE: vale para a página toda
+   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+/* "hidden" sempre esconde, mesmo em elementos com display: flex.
+   Sem esta regra, um botão com a classe .botao-grande aparece mesmo escondido. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--bege);
+  color: var(--texto);
+  font-family: var(--fonte-texto);
+  font-size: 18px;      /* letra grande para ler com calma ou com pressa */
+  line-height: 1.5;
+}
+
+main {
+  max-width: 560px;     /* em telas grandes, não espalha demais */
+  margin: 0 auto;
+  padding: 16px 16px 112px;   /* espaço embaixo para a barra de abas */
+}
+
+h1, h2, h3 {
+  color: var(--ameixa);
+  line-height: 1.2;
+}
+
+h2 {
+  font-family: var(--fonte-titulo);
+  font-weight: 400;
+  font-size: 26px;
+}
+
+a {
+  color: var(--roxo);
+}
+
+/* Título que só leitores de tela "veem" (para quem não enxerga) */
+.titulo-escondido {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.titulo-secao {
+  margin: 24px 0 12px;
+  font-size: 19px;
+}
+
+/* Ícones (desenhados pelo icones.js) */
+.icone svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+
+.icone-redondo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--rosa-claro);
+  color: var(--ameixa);
+}
+
+.icone-claro {
+  background: rgba(255, 255, 255, 0.18);
+  color: var(--branco);
+}
+
+/* ============================================================
+   BARRA DO TOPO (aviso de urgência + Sair rápido)
+   "sticky" faz a barra ficar presa no topo mesmo rolando a tela.
+   ============================================================ */
+.barra-topo {
+  position: sticky;
+  top: 0;
+  z-index: 1000;        /* acima do mapa */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--branco);
+  border-bottom: 2px solid var(--bege-escuro);
+}
+
+.aviso-urgencia {
+  margin: 0;
+  font-size: 16px;
+}
+
+.aviso-urgencia a {
+  font-weight: bold;
+  color: var(--vermelho);
+}
+
+.botao-sair-rapido {
+  flex-shrink: 0;
+  min-height: 48px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 999px;
+  background: var(--texto);
+  color: var(--branco);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.faixa {
+  margin: 0;
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.faixa-sem-internet {
+  background: var(--texto);
+  color: var(--branco);
+}
+
+.faixa-demonstracao {
+  background: #fde3a7;
+  color: #5b4300;
+  font-weight: bold;
+}
+
+/* ============================================================
+   LETREIRO "JUVENTUDES ANTI MISOGINIA" (rascunho 1)
+   Três linhas com tamanhos diferentes, como no desenho da equipe.
+   ============================================================ */
+.letreiro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  font-family: var(--fonte-titulo);
+  font-weight: 400;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.letreiro-linha1 { color: var(--rosa); }
+.letreiro-linha2 { color: var(--ameixa); }
+.letreiro-linha3 { color: var(--ameixa); }
+
+/* O "o" de MISOGINIA vira o símbolo ♀ no rascunho; aqui, um ♀ depois da palavra */
+.letreiro-linha3::after {
+  content: " ♀";
+  font-family: var(--fonte-texto);
+  font-weight: bold;
+}
+
+/* Um pouco menor que no rascunho, para os botões de ajuda caberem na primeira tela */
+.letreiro-grande .letreiro-linha1 { font-size: 34px; }
+.letreiro-grande .letreiro-linha2 { font-size: 70px; letter-spacing: -2px; }
+.letreiro-grande .letreiro-linha3 { font-size: 36px; }
+
+.letreiro-pequeno { align-items: flex-start; }
+.letreiro-pequeno .letreiro-linha1 { font-size: 15px; }
+.letreiro-pequeno .letreiro-linha2 { font-size: 30px; }
+.letreiro-pequeno .letreiro-linha3 { font-size: 16px; }
+
+/* ============================================================
+   CABEÇALHO DAS TELAS INTERNAS
+   ============================================================ */
+.cabecalho-app {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 14px 16px 0;
+}
+
+.frase-da-tela {
+  margin: 0;
+  padding-left: 14px;
+  border-left: 2px solid var(--ameixa);
+  color: var(--roxo);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+/* ============================================================
+   BOAS-VINDAS (rascunho 1)
+   As "ondas" são desenhos SVG usados como fundo.
+   ============================================================ */
+.tela-boas-vindas {
+  position: relative;
+  margin: -16px -16px -112px;
+  overflow: hidden;
+}
+
+.onda {
+  height: 72px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.onda-topo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 110' preserveAspectRatio='none'%3E%3Cpath d='M0 0h400v30c-60 40-120-10-200 20S60 110 0 80z' fill='%235b2a6e'/%3E%3Cpath d='M0 0h400v12c-70 30-130-6-210 16S50 80 0 56z' fill='%233a173d'/%3E%3C/svg%3E");
+}
+
+.onda-base {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 110' preserveAspectRatio='none'%3E%3Cpath d='M0 110V40c70-30 120 30 210 10s140-40 190-20v80z' fill='%23e7a3c2'/%3E%3Cpath d='M0 110V75c80-20 130 20 220 0s130-20 180 0v35z' fill='%235b2a6e'/%3E%3C/svg%3E");
+}
+
+.boas-vindas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 20px 4px;
+  text-align: center;
+}
+
+.frase-acolhimento {
+  max-width: 280px;
+  margin: 16px 0 4px;
+  color: var(--ameixa);
+  font-size: 20px;
+}
+
+/* Risquinho rosa embaixo da frase, como no rascunho */
+.frase-acolhimento::after {
+  content: "";
+  display: block;
+  width: 140px;
+  height: 4px;
+  margin: 14px auto 0;
+  border-radius: 4px;
+  background: var(--rosa);
+}
+
+/* Os dois botões de ajuda da primeira tela (pedido da equipe em 21/10) */
+.acoes-boas-vindas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 340px;
+  margin: 18px 0 10px;
+}
+
+.acoes-boas-vindas .botao-grande {
+  flex-direction: row;
+  gap: 10px;
+  margin: 0;
+}
+
+.atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 0;
+}
+
+.atalhos button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 4px 8px;
+  border: none;
+  border-right: 1px solid var(--bege-escuro);
+  background: none;
+  color: var(--ameixa);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.atalhos button:last-child {
+  border-right: none;
+}
+
+.atalhos .icone svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================================
+   BOTÕES GRANDES (fáceis de tocar, mínimo de 48px de altura)
+   ============================================================ */
+.botao-grande {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 60px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: 999px;
+  font-size: 19px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao-escuro {
+  background: var(--ameixa);
+  color: var(--branco);
+}
+
+.botao-ligar {
+  background: var(--rosa);
+  color: var(--branco);
+}
+
+.botao-secundario {
+  background: var(--branco);
+  color: var(--ameixa);
+  border: 2px solid var(--ameixa);
+}
+
+.botao-voltar {
+  min-height: 48px;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  color: var(--roxo);
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Contorno bem visível para quem navega pelo teclado */
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--rosa);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   INÍCIO (menu principal)
+   ============================================================ */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cartao-menu {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 80px;
+  padding: 14px 16px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 20px;
+  background: var(--branco);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cartao-menu strong,
+.cartao-menu small {
+  display: block;
+}
+
+.cartao-menu strong {
+  color: var(--ameixa);
+  font-size: 20px;
+}
+
+.cartao-menu small {
+  color: var(--texto-suave);
+  font-size: 15px;
+}
+
+.cartao-menu-emergencia {
+  background: var(--ameixa);
+  border-color: var(--ameixa);
+}
+
+.cartao-menu-emergencia strong,
+.cartao-menu-emergencia small {
+  color: var(--branco);
+}
+
+/* ============================================================
+   FILTROS (mapa e notícias)
+   ============================================================ */
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 4px;
+  overflow-x: auto;     /* no celular, os botões deslizam para o lado */
+}
+
+.botao-filtro {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--roxo-claro);
+  border-radius: 999px;
+  background: var(--branco);
+  color: var(--ameixa);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.botao-filtro .icone svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* O botão escolhido fica preenchido de roxo escuro */
+.botao-filtro[aria-pressed="true"] {
+  background: var(--ameixa);
+  border-color: var(--ameixa);
+  color: var(--branco);
+}
+
+/* ============================================================
+   BUSCA POR NOME (decisão 17)
+   ============================================================ */
+.busca {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 14px;
+  border: 1.5px solid var(--roxo-claro);
+  border-radius: 999px;
+  background: var(--branco);
+  color: var(--texto-suave);
+}
+
+.busca input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  border: none;
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  font-size: 17px;
+}
+
+.busca input:focus {
+  outline: none;
+}
+
+.busca:focus-within {
+  outline: 3px solid var(--rosa);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   MAPA, PERTO DE MIM E CARTÃO DO LOCAL (rascunho 2)
+   ============================================================ */
+.linha-de-botoes {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 8px;
+}
+
+/* Ao pular para a lista, o título não fica escondido embaixo da barra do topo */
+#titulo-lista {
+  scroll-margin-top: 90px;
+}
+.botao-perto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  margin-bottom: 14px;
+  border: 2px solid var(--ameixa);
+  border-radius: 999px;
+  background: var(--branco);
+  color: var(--ameixa);
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.mapa {
+  height: 340px;
+  margin-bottom: 14px;
+  border-radius: 20px;
+  border: 1px solid var(--bege-escuro);
+  z-index: 0;           /* o mapa fica embaixo da barra do topo */
+}
+
+/* Marcador em forma de gota, com o ícone da categoria */
+.pino {
+  position: relative;
+  width: 40px;
+  height: 48px;
+}
+
+.pino-gota {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pino-icone {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  color: var(--branco);
+}
+
+.pino-icone svg {
+  width: 22px;
+  height: 22px;
+}
+
+.pino-escolhido .pino-gota {
+  outline: 3px solid var(--branco);
+}
+
+.voce-esta-aqui {
+  width: 22px;
+  height: 22px;
+  border: 4px solid var(--branco);
+  border-radius: 50%;
+  background: var(--roxo);
+  box-shadow: 0 0 0 10px rgba(91, 42, 110, 0.2);
+}
+
+.cartao-do-local {
+  margin-bottom: 8px;
+  padding: 16px;
+  border-radius: 24px;
+  background: var(--branco);
+  box-shadow: 0 6px 20px rgba(58, 23, 61, 0.12);
+}
+
+.cartao-do-local-topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cartao-do-local h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.cartao-do-local p {
+  margin: 2px 0 0;
+  font-size: 15px;
+  color: var(--texto-suave);
+}
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--rosa-claro);
+  color: var(--ameixa);
+  font-size: 13px;
+}
+
+.selo .icone svg {
+  width: 14px;
+  height: 14px;
+}
+
+.acoes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.acao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 72px;
+  padding: 8px 4px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 16px;
+  background: var(--bege);
+  color: var(--ameixa);
+  font: inherit;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.acao-ligar {
+  background: var(--rosa-claro);
+}
+
+.escolha-de-bairro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.escolha-de-bairro select {
+  min-height: 48px;
+  padding: 8px;
+  border: 2px solid var(--ameixa);
+  border-radius: 12px;
+  background: var(--branco);
+  color: var(--texto);
+  font: inherit;
+}
+
+/* ============================================================
+   LISTA DE LOCAIS
+   ============================================================ */
+.lista-de-locais,
+.lista-de-noticias {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cartao-local {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 14px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 18px;
+  background: var(--branco);
+  color: var(--texto);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cartao-local .textos {
+  flex: 1;
+  min-width: 0;
+}
+
+.cartao-local strong {
+  display: block;
+  color: var(--ameixa);
+}
+
+.cartao-local .seta svg {
+  width: 20px;
+  height: 20px;
+  color: var(--roxo-claro);
+}
+
+.categoria {
+  display: inline-block;
+  margin: 2px 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.distancia {
+  display: block;
+  font-size: 15px;
+}
+
+/* ============================================================
+   DETALHE DO LOCAL
+   ============================================================ */
+.detalhe h2 {
+  margin-bottom: 4px;
+}
+
+.campo {
+  margin: 0 0 12px;
+}
+
+.campo-titulo {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--roxo);
+}
+
+.fonte {
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.avisar-equipe {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 2px solid var(--bege-escuro);
+}
+
+/* ============================================================
+   EMERGÊNCIA (rascunho 4)
+   ============================================================ */
+.cartao-emergencia {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 14px;
+  margin-top: 8px;
+  padding: 20px;
+  border-radius: 24px;
+  background: var(--ameixa);
+  color: var(--branco);
+}
+
+.cartao-emergencia h2 {
+  margin: 0;
+  color: var(--branco);
+}
+
+.cartao-emergencia p {
+  margin: 0;
+}
+
+.botao-190 {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 999px;
+  background: var(--rosa);
+  color: var(--branco);
+  font-size: 22px;
+  font-weight: bold;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.botao-190 small {
+  font-size: 14px;
+  font-weight: normal;
+  text-transform: none;
+}
+
+.canais {
+  display: grid;
+  gap: 10px;
+}
+
+.canal {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 18px;
+  background: var(--branco);
+  color: var(--texto);
+  text-decoration: none;
+}
+
+.canal .numero {
+  flex-shrink: 0;
+  min-width: 64px;
+  color: var(--rosa);
+  font-family: var(--fonte-titulo);
+  font-size: 28px;
+}
+
+.canal strong,
+.canal small {
+  display: block;
+}
+
+.canal strong {
+  color: var(--ameixa);
+}
+
+.canal small {
+  color: var(--texto-suave);
+  font-size: 15px;
+}
+
+.atalhos-mapa {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.atalho-mapa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 6px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 18px;
+  background: var(--branco);
+  color: var(--texto);
+  font: inherit;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.atalho-mapa strong {
+  color: var(--ameixa);
+  line-height: 1.2;
+}
+
+.atalho-mapa small {
+  color: var(--roxo);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   NOTÍCIAS (rascunho 3, sem fotos)
+   ============================================================ */
+.noticia-destaque {
+  display: block;
+  margin-bottom: 8px;
+  padding: 20px;
+  border-radius: 24px;
+  background: var(--roxo);
+  background-image: linear-gradient(135deg, var(--ameixa), var(--roxo) 60%, var(--roxo-claro));
+  color: var(--branco);
+}
+
+.noticia-destaque h3 {
+  margin: 8px 0;
+  color: var(--branco);
+  font-size: 22px;
+}
+
+.noticia-destaque p {
+  margin: 0 0 12px;
+}
+
+.noticia-destaque a {
+  color: var(--branco);
+  font-weight: bold;
+}
+
+.tema {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--rosa-claro);
+  color: var(--ameixa);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cartao-noticia {
+  margin-bottom: 10px;
+  padding: 16px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 18px;
+  background: var(--branco);
+}
+
+.cartao-noticia h3 {
+  margin: 6px 0 4px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.cartao-noticia p {
+  margin: 0 0 8px;
+}
+
+.origem {
+  font-size: 14px;
+  color: var(--texto-suave);
+}
+
+.noticia-destaque .origem {
+  color: var(--rosa-claro);
+}
+
+.mensagem-acolhimento {
+  margin: 0 0 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--rosa-claro);
+  color: var(--ameixa);
+  font-size: 17px;
+}
+
+/* ============================================================
+   PRIVACIDADE E SEGURANÇA
+   ============================================================ */
+.bloco-privacidade {
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--bege-escuro);
+  border-radius: 18px;
+  background: var(--branco);
+}
+
+.bloco-privacidade h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.bloco-privacidade p,
+.bloco-privacidade ul {
+  margin: 0;
+  font-size: 16px;
+}
+
+.bloco-privacidade ul {
+  padding-left: 20px;
+}
+
+/* ============================================================
+   AVISOS E DICAS
+   ============================================================ */
+.aviso {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--branco);
+  border-left: 6px solid var(--rosa);
+  font-size: 16px;
+}
+
+.aviso p {
+  margin: 0;
+}
+
+.aviso-desatualizado {
+  border-left-color: var(--vermelho);
+}
+
+.dica {
+  font-size: 16px;
+}
+
+/* ============================================================
+   BARRA DE ABAS (embaixo da tela)
+   "fixed" deixa a barra sempre no mesmo lugar, mesmo rolando a tela.
+   ============================================================ */
+.barra-abas {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: var(--branco);
+  border-top: 1px solid var(--bege-escuro);
+}
+
+.barra-abas button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 6px 2px;
+  border: none;
+  border-radius: 14px;
+  background: none;
+  color: var(--texto-suave);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* A aba da tela atual fica em destaque */
+.barra-abas button[aria-current="page"] {
+  color: var(--ameixa);
+  font-weight: bold;
+  background: var(--rosa-claro);
+}

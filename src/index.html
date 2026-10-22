@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <!-- Faz a página caber na largura do celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Não deixar buscadores (Google etc.) guardarem o app enquanto ele é um projeto -->
+  <meta name="robots" content="noindex">
+  <!-- Nome que aparece na aba e na tela inicial do celular: provisório e discreto (decisão 2) -->
+  <title>Rede de Apoio</title>
+
+  <!-- Fase 3: dados para o app poder ser "instalado" no celular (PWA) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#3a173d">
+  <link rel="icon" href="icones/icone-192.png">
+  <link rel="apple-touch-icon" href="icones/icone-192.png">
+
+  <!-- Fase 2: biblioteca do mapa (Leaflet), guardada dentro do projeto -->
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       BARRA DO TOPO: aparece em TODAS as telas (F8)
+       Os rascunhos não tinham o Sair rápido, mas ele é obrigatório.
+       ============================================================ -->
+  <header class="barra-topo">
+    <p class="aviso-urgencia">Em perigo agora? <a href="tel:190">Ligue 190</a></p>
+    <button id="botao-sair-rapido" class="botao-sair-rapido" type="button">
+      Sair rápido
+    </button>
+  </header>
+
+  <!-- Aparece só no modo demonstração (dados fictícios, só no computador) -->
+  <p id="faixa-demonstracao" class="faixa faixa-demonstracao" hidden>
+    MODO DEMONSTRAÇÃO: os locais e notícias são fictícios.
+  </p>
+
+  <!-- Fase 3 (F9): aparece quando o celular fica sem internet -->
+  <p id="faixa-sem-internet" class="faixa faixa-sem-internet" hidden>
+    Você está sem internet. A lista de locais e os telefones continuam aqui.
+  </p>
+
+  <!-- ============================================================
+       CABEÇALHO DAS TELAS INTERNAS (rascunhos 2, 3 e 4)
+       O letreiro com o nome da equipe e uma frase que muda em cada tela.
+       ============================================================ -->
+  <div id="cabecalho-app" class="cabecalho-app" hidden>
+    <p class="letreiro letreiro-pequeno" aria-label="Juventudes Anti Misoginia">
+      <span class="letreiro-linha1">Juventudes</span>
+      <span class="letreiro-linha2">Anti</span>
+      <span class="letreiro-linha3">Misoginia</span>
+    </p>
+    <p id="frase-da-tela" class="frase-da-tela"></p>
+  </div>
+
+  <main>
+
+    <!-- ============================================================
+         TELA 1: BOAS-VINDAS (F1) — rascunho 1
+         ============================================================ -->
+    <section id="tela-boas-vindas" class="tela tela-boas-vindas">
+      <div class="onda onda-topo" aria-hidden="true"></div>
+      <div class="boas-vindas">
+        <h1 class="letreiro letreiro-grande" aria-label="Juventudes Anti Misoginia">
+          <span class="letreiro-linha1">Juventudes</span>
+          <span class="letreiro-linha2">Anti</span>
+          <span class="letreiro-linha3">Misoginia</span>
+        </h1>
+        <p class="frase-acolhimento">
+          Juntas por um futuro mais seguro e igualitário.
+        </p>
+        <!-- Pedido da equipe (21/10): a ajuda aparece já na primeira tela -->
+        <div class="acoes-boas-vindas">
+          <button class="botao-grande botao-escuro" type="button" data-ir-para="tela-locais">
+            <span class="icone" data-icone="mapa"></span> Encontrar locais de apoio
+          </button>
+          <button class="botao-grande botao-ligar" type="button" data-ir-para="tela-emergencia">
+            <span class="icone" data-icone="telefone"></span> Emergência: 190, 180 e 100
+          </button>
+        </div>
+        <nav class="atalhos" aria-label="Atalhos">
+          <button type="button" data-ir-para="tela-menu"><span class="icone" data-icone="inicio"></span>Entrar no app</button>
+          <button type="button" data-ir-para="tela-noticias"><span class="icone" data-icone="noticias"></span>Notícias</button>
+          <button type="button" data-ir-para="tela-privacidade"><span class="icone" data-icone="escudo"></span>Privacidade</button>
+        </nav>
+      </div>
+      <div class="onda onda-base" aria-hidden="true"></div>
+    </section>
+
+    <!-- ============================================================
+         TELA 2: INÍCIO (menu principal)
+         ============================================================ -->
+    <section id="tela-menu" class="tela" data-frase="Você não está sozinha." hidden>
+      <h2>Como podemos ajudar?</h2>
+      <nav class="menu">
+        <button class="cartao-menu" type="button" data-ir-para="tela-locais">
+          <span class="icone-redondo" data-icone="mapa"></span>
+          <span><strong>Encontrar ajuda</strong><small>Locais de apoio perto de você</small></span>
+        </button>
+        <button class="cartao-menu cartao-menu-emergencia" type="button" data-ir-para="tela-emergencia">
+          <span class="icone-redondo" data-icone="telefone"></span>
+          <span><strong>Emergência e denúncia</strong><small>190, 180 e 100</small></span>
+        </button>
+        <button class="cartao-menu" type="button" data-ir-para="tela-noticias">
+          <span class="icone-redondo" data-icone="noticias"></span>
+          <span><strong>Notícias</strong><small>Conheça seus direitos</small></span>
+        </button>
+        <button class="cartao-menu" type="button" data-ir-para="tela-privacidade">
+          <span class="icone-redondo" data-icone="escudo"></span>
+          <span><strong>Privacidade e segurança</strong><small>O que o app guarda (e o que não guarda)</small></span>
+        </button>
+      </nav>
+    </section>
+
+    <!-- ============================================================
+         TELA 3: MAPA DE APOIO — rascunho 2
+         Fase 1: lista. Fase 2: mapa (F2), filtro (F3) e perto de mim (F5).
+         ============================================================ -->
+    <section id="tela-locais" class="tela" data-frase="Juntas por um futuro mais seguro e igualitário." hidden>
+      <h2 class="titulo-escondido">Locais de apoio</h2>
+
+      <!-- Busca por nome (decisão 17). autocomplete="off": o navegador não guarda o que foi digitado. -->
+      <div class="busca">
+        <label for="campo-busca" class="titulo-escondido">Buscar locais de apoio</label>
+        <span class="icone" data-icone="lupa"></span>
+        <input id="campo-busca" type="search" placeholder="Buscar locais de apoio..."
+          autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+
+      <!-- F3: filtro por categoria. O JavaScript cria um botão para cada categoria. -->
+      <div id="filtros" class="filtros" role="group" aria-label="Filtrar por tipo de local"></div>
+
+      <div class="linha-de-botoes">
+        <!-- F5: perto de mim. A localização só é pedida quando a pessoa toca aqui. -->
+        <button id="botao-perto-de-mim" class="botao-perto" type="button">
+          <span class="icone" data-icone="localizar"></span>
+          <span id="texto-perto-de-mim">Perto de mim</span>
+        </button>
+        <!-- Pedido da equipe (21/10): ir direto para a lista, sem usar o mapa -->
+        <button id="botao-ver-lista" class="botao-perto" type="button">
+          <span class="icone" data-icone="lista"></span>
+          Ver lista
+        </button>
+      </div>
+      <p id="aviso-perto" class="aviso" hidden></p>
+
+      <!-- Se a localização for negada, a pessoa escolhe o bairro -->
+      <div id="escolha-de-bairro" class="escolha-de-bairro" hidden>
+        <label for="lista-de-bairros">Escolha o bairro:</label>
+        <select id="lista-de-bairros"></select>
+      </div>
+
+      <!-- F2: o mapa. O Leaflet desenha dentro desta caixa. -->
+      <div id="mapa" class="mapa" aria-label="Mapa dos locais de apoio"></div>
+      <p id="aviso-mapa" class="dica" hidden></p>
+
+      <!-- Cartão do local escolhido no mapa (rascunho 2) -->
+      <div id="cartao-do-local" class="cartao-do-local" hidden></div>
+
+      <!-- A lista continua aqui, embaixo do mapa (e funciona sem internet) -->
+      <h3 id="titulo-lista" class="titulo-secao">Lista de locais</h3>
+      <ul id="lista-de-locais" class="lista-de-locais"></ul>
+      <div id="aviso-lista" class="aviso" hidden></div>
+    </section>
+
+    <!-- ============================================================
+         TELA 4: DETALHE DO LOCAL (F4 e F10)
+         ============================================================ -->
+    <section id="tela-detalhe" class="tela" data-frase="Você não está sozinha." hidden>
+      <button class="botao-voltar" type="button" data-ir-para="tela-locais">← Voltar ao mapa</button>
+      <!-- O JavaScript preenche este bloco quando a pessoa toca num local -->
+      <article id="detalhe-do-local" class="detalhe"></article>
+    </section>
+
+    <!-- ============================================================
+         TELA 5: EMERGÊNCIA E DENÚNCIA (F6) — rascunho 4
+         Estes são os ÚNICOS números fixos do app (ver CLAUDE.md).
+         ============================================================ -->
+    <section id="tela-emergencia" class="tela" data-frase="Você não está sozinha." hidden>
+      <div class="cartao-emergencia">
+        <span class="icone-redondo icone-claro" data-icone="telefone"></span>
+        <div>
+          <h2>Emergência</h2>
+          <p>Precisa de ajuda agora?</p>
+        </div>
+        <a class="botao-190" href="tel:190">
+          Ligar 190
+          <small>Polícia Militar</small>
+        </a>
+      </div>
+
+      <h3 class="titulo-secao">Outros canais de ajuda</h3>
+      <div class="canais">
+        <a class="canal" href="tel:180">
+          <span class="numero">180</span>
+          <span><strong>Central de Atendimento à Mulher</strong><small>Orientação e denúncia, 24 horas</small></span>
+        </a>
+        <a class="canal" href="tel:100">
+          <span class="numero">100</span>
+          <span><strong>Disque Direitos Humanos</strong><small>Denúncia de violação de direitos</small></span>
+        </a>
+      </div>
+
+      <h3 class="titulo-secao">Encontrar no mapa</h3>
+      <div class="atalhos-mapa">
+        <button type="button" class="atalho-mapa" data-ver-categoria="delegacia-da-mulher">
+          <span class="icone-redondo" data-icone="escudo"></span><strong>Delegacia da Mulher</strong><small>Ver no mapa</small>
+        </button>
+        <button type="button" class="atalho-mapa" data-ver-categoria="centro-de-referencia">
+          <span class="icone-redondo" data-icone="coracao"></span><strong>Acolhimento</strong><small>Ver no mapa</small>
+        </button>
+        <button type="button" class="atalho-mapa" data-ver-categoria="hospital">
+          <span class="icone-redondo" data-icone="saude"></span><strong>Saúde</strong><small>Ver no mapa</small>
+        </button>
+      </div>
+
+      <p class="dica">Se a ligação não completar, tente outro número desta tela.</p>
+    </section>
+
+    <!-- ============================================================
+         TELA 6: NOTÍCIAS (F7) — rascunho 3 (sem fotos, pela regra do projeto)
+         ============================================================ -->
+    <section id="tela-noticias" class="tela" data-frase="Conheça seus direitos e encontre apoio." hidden>
+      <h2 class="titulo-escondido">Notícias</h2>
+      <!-- Frase escrita pela equipe em 21/10 -->
+      <p class="mensagem-acolhimento">
+        Outras mulheres já passaram por situações difíceis e conseguiram recomeçar.
+        Você também merece encontrar apoio, superar esse momento e construir uma nova história. 💜
+      </p>
+      <p class="aviso aviso-sensivel">
+        Algumas matérias falam de violência contra a mulher. Leia quando se sentir bem para isso.
+      </p>
+      <div id="filtros-de-noticias" class="filtros" role="group" aria-label="Filtrar notícias por tema" hidden></div>
+      <div id="noticia-destaque"></div>
+      <h3 id="titulo-ultimas" class="titulo-secao" hidden>Últimas notícias</h3>
+      <ul id="lista-de-noticias" class="lista-de-noticias"></ul>
+      <div id="aviso-noticias" class="aviso" hidden>
+        <p id="texto-aviso-noticias"></p>
+        <button id="botao-tentar-de-novo" class="botao-grande botao-secundario" type="button" hidden>
+          Tentar de novo
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         TELA 7: PRIVACIDADE E SEGURANÇA
+         Pedido da equipe (21/10): explicar com linguagem simples, sem
+         prometer sigilo absoluto.
+         ============================================================ -->
+    <section id="tela-privacidade" class="tela" data-frase="Você merece viver com segurança e respeito." hidden>
+      <button class="botao-voltar" type="button" data-ir-para="tela-menu">← Voltar</button>
+      <h2>Privacidade e segurança</h2>
+
+      <div class="bloco-privacidade">
+        <h3>O que este app não faz</h3>
+        <ul>
+          <li>Não pede cadastro, nome, telefone nem senha.</li>
+          <li>Não recebe relatos nem denúncias. Para denunciar, ligue 180 ou 190.</li>
+          <li>Não guarda o que você busca nem os locais que você abre.</li>
+          <li>Não envia notificações.</li>
+        </ul>
+      </div>
+
+      <div class="bloco-privacidade">
+        <h3>Sua localização</h3>
+        <p>
+          O app só pede a sua localização quando você toca em "Perto de mim". Ela é usada para
+          calcular a distância e não é guardada nem enviada para a equipe.
+        </p>
+      </div>
+
+      <div class="bloco-privacidade">
+        <h3>O mapa</h3>
+        <p>
+          As imagens do mapa vêm do OpenStreetMap, um serviço de mapas gratuito. Como em qualquer
+          site, esse serviço recebe dados técnicos da conexão, como a região do mapa que foi
+          aberta. Por isso, não dizemos que o uso é totalmente anônimo.
+        </p>
+      </div>
+
+      <div class="bloco-privacidade">
+        <h3>O botão "Sair rápido"</h3>
+        <p>
+          Ele troca o app por uma página de buscas, e o botão "voltar" não traz o app de volta.
+          <strong>Mas ele não apaga o histórico do navegador.</strong> Se alguém mexe no seu
+          celular, você pode apagar o histórico depois de usar o app, ou abrir o app numa aba
+          anônima (privada).
+        </p>
+      </div>
+
+      <div class="bloco-privacidade">
+        <h3>Sem internet</h3>
+        <p>
+          Depois de aberto uma vez, o app guarda a lista de locais e os telefones no celular.
+          Sem internet, a lista e os números continuam funcionando. O mapa precisa de internet.
+        </p>
+      </div>
+
+      <div class="bloco-privacidade">
+        <h3>Quem faz este app</h3>
+        <p>
+          Este é um projeto educativo de estudantes, com acompanhamento de professores. Os
+          endereços e telefones são conferidos em fontes oficiais, mas podem mudar: se puder,
+          ligue antes de ir. Em perigo, ligue 190.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       BARRA DE ABAS (rascunhos 2, 3 e 4): navegação embaixo da tela
+       ============================================================ -->
+  <nav id="barra-abas" class="barra-abas" aria-label="Navegação principal" hidden>
+    <button type="button" data-ir-para="tela-menu"><span class="icone" data-icone="inicio"></span>Início</button>
+    <button type="button" data-ir-para="tela-locais"><span class="icone" data-icone="mapa"></span>Mapa</button>
+    <button type="button" data-ir-para="tela-noticias"><span class="icone" data-icone="noticias"></span>Notícias</button>
+    <button type="button" data-ir-para="tela-emergencia"><span class="icone" data-icone="telefone"></span>Emergência</button>
+  </nav>
+
+  <!-- A biblioteca do mapa precisa vir ANTES do nosso código, que usa ela -->
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="icones.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
