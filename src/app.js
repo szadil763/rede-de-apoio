@@ -892,6 +892,66 @@ function formatarDistancia(km) {
 
 
 // ------------------------------------------------------------
+// 9b. AVISAR UMA PESSOA DE CONFIANÇA (decisão 24)
+// O app NÃO manda nada sozinho. Ele só monta a mensagem e abre o WhatsApp
+// ou o SMS do próprio celular; a pessoa escolhe o contato e toca em enviar.
+// A posição é pedida só neste toque e não é guardada em lugar nenhum.
+// "encodeURIComponent" transforma o texto num pedaço de link (espaço vira %20).
+// ------------------------------------------------------------
+const campoMensagem = document.getElementById("mensagem-confianca");
+const caixaIncluirLocalizacao = document.getElementById("incluir-localizacao");
+const avisoConfianca = document.getElementById("aviso-confianca");
+
+function abrirMensagem(canal, texto) {
+  const codificado = encodeURIComponent(texto);
+  // Usamos location.href e não window.open: depois de esperar a localização, o celular
+  // bloquearia o window.open como "pop-up", porque já não parece resposta ao toque.
+  if (canal === "whatsapp") {
+    // wa.me sem número: o WhatsApp abre e pede para escolher o contato
+    window.location.href = "https://wa.me/?text=" + codificado;
+  } else {
+    // "sms:?&body=" funciona no Android e no iPhone
+    window.location.href = "sms:?&body=" + codificado;
+  }
+}
+
+function avisarPessoaDeConfianca(canal) {
+  const texto = campoMensagem.value.trim() || "Preciso de ajuda.";
+  avisoConfianca.hidden = false;
+
+  if (!caixaIncluirLocalizacao.checked || !("geolocation" in navigator)) {
+    avisoConfianca.textContent = "Escolha o contato e toque em enviar.";
+    abrirMensagem(canal, texto);
+    return;
+  }
+
+  avisoConfianca.textContent = "Procurando onde você está...";
+  navigator.geolocation.getCurrentPosition(
+    function (posicao) {
+      // 5 casas depois da vírgula = precisão de mais ou menos 1 metro
+      const lugar = posicao.coords.latitude.toFixed(5) + "," + posicao.coords.longitude.toFixed(5);
+      avisoConfianca.textContent = "Pronto. Escolha o contato e toque em enviar.";
+      abrirMensagem(canal, texto + " Estou aqui: https://www.google.com/maps?q=" + lugar);
+    },
+    function () {
+      // Sem permissão ou sem sinal: não travar a pessoa, mandar sem a posição
+      avisoConfianca.textContent =
+        "Não consegui pegar sua localização. A mensagem vai sem ela: escreva onde você está.";
+      abrirMensagem(canal, texto);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+document.getElementById("enviar-whatsapp").addEventListener("click", function () {
+  avisarPessoaDeConfianca("whatsapp");
+});
+document.getElementById("enviar-sms").addEventListener("click", function () {
+  avisarPessoaDeConfianca("sms");
+});
+
+
+// ------------------------------------------------------------
 // 10. NOTÍCIAS (F7) — com destaque e filtro por tema (rascunho 3)
 // Lemos data/noticias.json. As matérias são escolhidas pela equipe.
 // Sem fotos: é uma regra do projeto (evitar imagens fortes).

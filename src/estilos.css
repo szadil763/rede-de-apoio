@@ -814,6 +814,90 @@ select:focus-visible {
   text-transform: none;
 }
 
+/* Avisar uma pessoa de confiança (decisão 24) */
+.bloco-confianca {
+  margin-top: 14px;
+  padding: 18px;
+  border: 2px solid var(--rosa);
+  border-radius: 24px;
+  background: var(--branco);
+}
+
+.bloco-confianca h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 19px;
+}
+
+.bloco-confianca p {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.bloco-confianca label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.bloco-confianca textarea {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 2px solid var(--bege-escuro);
+  border-radius: 14px;
+  font: inherit;
+  font-size: 16px;      /* 16px: o iPhone não dá zoom ao tocar no campo */
+  resize: vertical;
+}
+
+.bloco-confianca .opcao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: normal;
+}
+
+.bloco-confianca .opcao input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--ameixa);
+}
+
+.botoes-confianca {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.botao-confianca {
+  min-height: 52px;
+  border: none;
+  border-radius: 999px;
+  background: var(--ameixa);
+  color: var(--branco);
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.aviso-confianca {
+  padding: 10px 12px;
+  border-left: 6px solid var(--rosa);
+  border-radius: 12px;
+  background: var(--bege);
+}
+
+.bloco-confianca .nota-confianca {
+  margin: 0;
+  font-size: 14px;
+}
+
 .canais {
   display: grid;
   gap: 10px;

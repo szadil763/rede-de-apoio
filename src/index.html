@@ -77,7 +77,7 @@
             <span class="icone" data-icone="mapa"></span> Encontrar locais de apoio
           </button>
           <button class="botao-grande botao-ligar" type="button" data-ir-para="tela-emergencia">
-            <span class="icone" data-icone="telefone"></span> Emergência: 190, 180 e 100
+            <span class="icone" data-icone="telefone"></span> Preciso de ajuda agora
           </button>
         </div>
         <nav class="atalhos" aria-label="Atalhos">
@@ -102,7 +102,7 @@
         </button>
         <button class="cartao-menu cartao-menu-emergencia" type="button" data-ir-para="tela-emergencia">
           <span class="icone-redondo" data-icone="telefone"></span>
-          <span><strong>Emergência e denúncia</strong><small>190, 180 e 100</small></span>
+          <span><strong>Preciso de ajuda agora</strong><small>190, 180, 100 e avisar alguém de confiança</small></span>
         </button>
         <button class="cartao-menu" type="button" data-ir-para="tela-noticias">
           <span class="icone-redondo" data-icone="noticias"></span>
@@ -194,6 +194,28 @@
           Ligar 190
           <small>Polícia Militar</small>
         </a>
+      </div>
+
+      <!-- Decisão 24: a PRÓPRIA pessoa envia, pelo WhatsApp ou SMS do celular dela.
+           O app não guarda a mensagem nem a posição e não manda nada sozinho. -->
+      <div class="bloco-confianca">
+        <h3><span class="icone" data-icone="mensagem"></span> Avisar uma pessoa de confiança</h3>
+        <p>O app abre o WhatsApp ou as mensagens do seu celular com um pedido de ajuda. Você escolhe
+          para quem mandar e toca em enviar.</p>
+        <label for="mensagem-confianca">Mensagem (você pode mudar)</label>
+        <textarea id="mensagem-confianca" rows="2" maxlength="300" autocomplete="off"
+          spellcheck="false">Preciso de ajuda. Pode me ligar?</textarea>
+        <label class="opcao">
+          <input id="incluir-localizacao" type="checkbox" checked>
+          Mandar junto onde estou agora
+        </label>
+        <div class="botoes-confianca">
+          <button id="enviar-whatsapp" class="botao-confianca" type="button">WhatsApp</button>
+          <button id="enviar-sms" class="botao-confianca" type="button">SMS</button>
+        </div>
+        <p id="aviso-confianca" class="aviso-confianca" role="status" hidden></p>
+        <p class="nota-confianca">A mensagem fica guardada no WhatsApp ou no SMS. Se alguém mexe no seu
+          celular, apague depois. Quem receber vai ver onde você está. Em perigo, ligue 190.</p>
       </div>
 
       <h3 class="titulo-secao">Outros canais de ajuda</h3>
@@ -310,8 +332,10 @@
       <div class="bloco-privacidade">
         <h3>Sua localização</h3>
         <p>
-          O app só pede a sua localização quando você toca em "Perto de mim". Ela é usada para
-          calcular a distância e não é guardada nem enviada para a equipe.
+          O app só pede a sua localização quando você toca em "Perto de mim" ou em "Avisar uma
+          pessoa de confiança". No "Perto de mim", ela serve para calcular a distância. No "Avisar",
+          ela vira um link do mapa dentro da mensagem, que <strong>você</strong> envia pelo seu WhatsApp
+          ou SMS. O app não guarda a sua localização e nunca a envia sozinho, nem para a equipe.
         </p>
       </div>
 
