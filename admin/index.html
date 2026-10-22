@@ -169,21 +169,27 @@
 
     <!-- ===================== ACESSOS ===================== -->
     <section id="aba-acessos" class="aba" role="tabpanel" hidden>
-      <h2>Quantas pessoas abrem o app</h2>
-      <p>
-        O app conta <strong>quantas vezes ele é aberto</strong>, usando o serviço gratuito
-        <strong>GoatCounter</strong>: sem cookies e sem cadastro. Ele <strong>não</strong> conta o que a
-        pessoa busca, quais locais abre, nem onde ela está.
-      </p>
-      <div id="estado-contador" class="aviso"></div>
-      <h3>Como ligar o contador (uma vez só, feito pelo professor)</h3>
-      <ol>
-        <li>Crie uma conta em <a href="https://www.goatcounter.com/signup" target="_blank" rel="noopener">goatcounter.com/signup</a>
-          com o e-mail da escola. Em "Code", escolha um nome discreto (ex.: <code>rededeapoio</code>).</li>
-        <li>Mande o endereço (ex.: <code>https://rededeapoio.goatcounter.com</code>) para quem programa o app
-          preencher <code>CONTADOR_DE_ACESSOS</code> no <code>src/app.js</code>.</li>
-        <li>O painel do GoatCounter mostra os acessos por dia, semana e mês.</li>
-      </ol>
+      <h2>Quantas vezes o app foi aberto</h2>
+      <div class="numeros-acessos">
+        <div class="numero-acesso"><strong id="acessos-hoje">–</strong><span>hoje</span></div>
+        <div class="numero-acesso"><strong id="acessos-7">–</strong><span>últimos 7 dias</span></div>
+        <div class="numero-acesso"><strong id="acessos-30">–</strong><span>últimos 30 dias</span></div>
+      </div>
+      <h3>Últimos 14 dias</h3>
+      <ol id="grafico-acessos" class="grafico-acessos" aria-label="Aberturas por dia"></ol>
+      <p id="estado-acessos" class="dica" role="status"></p>
+      <button type="button" id="atualizar-acessos" class="botao botao-claro">Atualizar</button>
+      <h3>Como é contado</h3>
+      <ul>
+        <li>Cada vez que alguém abre o app, o banco soma 1 ao dia de hoje. É <strong>só um número por
+          dia</strong>: nada sobre a pessoa, o que ela buscou, quais locais abriu ou onde está.</li>
+        <li>São <strong>aberturas, não pessoas</strong>: quem abre 3 vezes conta 3. Para contar pessoas
+          seria preciso reconhecer cada celular, e o app não faz isso de propósito.</li>
+        <li>Não contam: testes no computador, o modo demonstração, quem está sem internet e quem pediu
+          ao navegador para não ser rastreado.</li>
+        <li>As regras do banco só deixam <strong>somar 1</strong>. Alguém mal-intencionado poderia
+          inflar o número, mas não apagar nem ver nada.</li>
+      </ul>
     </section>
 
     <!-- ===================== AJUDA ===================== -->

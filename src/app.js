@@ -14,11 +14,6 @@ const PAGINA_NEUTRA = "https://www.google.com/";
 // Enquanto estiver vazio, o app mostra uma orientação no lugar do botão.
 const CANAL_DA_EQUIPE = "";
 
-// Contador de acessos (GoatCounter): endereço do painel criado pelo professor.
-// Exemplo: "https://rededeapoio.goatcounter.com". Vazio = contador desligado.
-// Ver a aba "Acessos" do painel do administrador (admin/index.html).
-const CONTADOR_DE_ACESSOS = "";
-
 // Depois de quantos meses sem conferência um local é considerado desatualizado.
 const MESES_PARA_DESATUALIZAR = 6;
 
@@ -1135,21 +1130,38 @@ window.addEventListener("appinstalled", esconderConviteParaInstalar);
 
 
 // ------------------------------------------------------------
-// 12. CONTADOR DE ACESSOS
-// Conta só UMA coisa: "o app foi aberto". Nada sobre a pessoa: não conta o
-// que ela busca, quais locais abre, nem onde está. Sem cookies.
-// Usamos uma "imagem invisível" em vez de carregar o código de outro site:
-// assim nenhum programa de fora roda dentro do nosso app.
+// 12. CONTADOR DE ABERTURAS (decisão 21)
+// Conta só UMA coisa: "o app foi aberto hoje". Nada sobre a pessoa: não conta
+// o que ela busca, quais locais abre, nem onde está. Sem cookies e sem nada
+// guardado no celular.
+// No Firestore existe um documento por dia (ex.: acessos/2026-10-22) com o
+// campo "total". Pedimos ao banco para SOMAR 1 ("increment"); as regras do
+// banco só deixam somar 1, e só os administradores conseguem ler o número.
 // ------------------------------------------------------------
+function diaDeHojeNoBrasil() {
+  // "en-CA" escreve a data como 2026-10-22, que é o nome do documento
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+}
+
 function contarAcesso() {
-  if (!linkSeguro(CONTADOR_DE_ACESSOS)) return;          // contador desligado
+  if (!USAR_FIREBASE) return;                            // sem Firebase, sem contador
   if (NO_COMPUTADOR || MODO_DEMONSTRACAO) return;        // testes não contam
   if (navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return; // pediu para não ser rastreada
   if (!navigator.onLine) return;
-  const contagem = new Image();
-  contagem.referrerPolicy = "no-referrer";
-  contagem.src = CONTADOR_DE_ACESSOS.replace(/\/$/, "") + "/count?p=" + encodeURIComponent("/app-aberto") +
-    "&t=" + encodeURIComponent("App aberto");
+
+  const projeto = "projects/" + CONFIG_DO_FIREBASE.projectId + "/databases/(default)";
+  fetch("https://firestore.googleapis.com/v1/" + projeto + "/documents:commit?key=" + CONFIG_DO_FIREBASE.apiKey, {
+    method: "POST",
+    keepalive: true,                                     // termina de enviar mesmo se a pessoa sair
+    body: JSON.stringify({
+      writes: [{
+        transform: {
+          document: projeto + "/documents/acessos/" + diaDeHojeNoBrasil(),
+          fieldTransforms: [{ fieldPath: "total", increment: { integerValue: "1" } }],
+        },
+      }],
+    }),
+  }).catch(function () { /* se falhar, só não conta; o app segue normal */ });
 }
 
 

@@ -16,7 +16,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDoc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc,
-  serverTimestamp, deleteField, connectFirestoreEmulator,
+  serverTimestamp, deleteField, connectFirestoreEmulator, query, where, documentId,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebase = initializeApp(CONFIG_DO_FIREBASE);
@@ -77,6 +77,7 @@ for (const aba of document.querySelectorAll("[data-aba]")) {
       $(outra.dataset.aba).hidden = outra !== aba;
     }
     if (aba.dataset.aba === "aba-locais" && mapa) mapa.invalidateSize();
+    if (aba.dataset.aba === "aba-acessos") mostrarAcessos();
   });
 }
 
@@ -174,7 +175,6 @@ $("abrir-painel").addEventListener("click", async function () {
   if (!painelPreparado) {
     painelPreparado = true;
     prepararMapa();
-    verificarContador();
   }
   if (pararDeOuvir.length === 0) await comecarAOuvir();
   if (mapa) mapa.invalidateSize();
@@ -768,26 +768,57 @@ formNoticia.addEventListener("submit", async function (evento) {
 
 
 // ------------------------------------------------------------
-// 10. ACESSOS: o contador está ligado?
+// 10. ACESSOS: quantas vezes o app foi aberto (coleção "acessos")
+// Cada documento é um dia ("2026-10-22") com o campo "total".
 // ------------------------------------------------------------
-async function verificarContador() {
-  const caixa = $("estado-contador");
+function diaNoBrasil(data) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(data);
+}
+
+// Os últimos N dias, do mais antigo para hoje: ["2026-10-09", ..., "2026-10-22"]
+function ultimosDias(quantos) {
+  const dias = [];
+  for (let i = quantos - 1; i >= 0; i--) dias.push(diaNoBrasil(new Date(Date.now() - i * 86400000)));
+  return dias;
+}
+
+async function mostrarAcessos() {
+  $("estado-acessos").textContent = "Carregando…";
+  const dias30 = ultimosDias(30);
   try {
-    const codigo = await (await fetch("../src/app.js")).text();
-    const achado = codigo.match(/const CONTADOR_DE_ACESSOS = "([^"]*)"/);
-    const endereco = achado ? achado[1] : "";
-    if (endereco) {
-      caixa.textContent = "Contador ligado. ";
-      const link = document.createElement("a");
-      link.href = endereco;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "Abrir o painel de acessos";
-      caixa.append(link);
-    } else {
-      caixa.textContent = "O contador ainda está desligado. Siga os passos abaixo.";
+    // Só os documentos dos últimos 30 dias (o nome do documento é a data)
+    const resultado = await getDocs(query(collection(banco, "acessos"), where(documentId(), ">=", dias30[0])));
+    const porDia = {};
+    resultado.forEach(function (ficha) { porDia[ficha.id] = Number(ficha.data().total) || 0; });
+    const somar = function (dias) { return dias.reduce(function (soma, dia) { return soma + (porDia[dia] || 0); }, 0); };
+
+    $("acessos-hoje").textContent = somar(dias30.slice(-1));
+    $("acessos-7").textContent = somar(dias30.slice(-7));
+    $("acessos-30").textContent = somar(dias30);
+
+    // Gráfico de barras: a barra mais alta ocupa a largura toda
+    const dias14 = dias30.slice(-14);
+    const maior = Math.max(1, ...dias14.map(function (dia) { return porDia[dia] || 0; }));
+    const grafico = $("grafico-acessos");
+    grafico.replaceChildren();
+    for (const dia of dias14) {
+      const total = porDia[dia] || 0;
+      const linha = document.createElement("li");
+      const rotulo = document.createElement("span");
+      rotulo.textContent = dia.slice(8, 10) + "/" + dia.slice(5, 7);
+      const barra = document.createElement("span");
+      barra.className = "barra";
+      barra.style.width = (total / maior * 100) + "%";
+      const numero = document.createElement("span");
+      numero.textContent = total;
+      linha.append(rotulo, barra, numero);
+      grafico.append(linha);
     }
+    $("estado-acessos").textContent = "Atualizado às " +
+      new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) + ".";
   } catch (falha) {
-    caixa.textContent = "Não consegui ver se o contador está ligado.";
+    $("estado-acessos").textContent = explicarErro(falha);
   }
 }
+
+$("atualizar-acessos").addEventListener("click", mostrarAcessos);
