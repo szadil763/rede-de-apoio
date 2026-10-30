@@ -13,6 +13,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail,
   setPersistence, browserSessionPersistence, connectAuthEmulator,
+  EmailAuthProvider, reauthenticateWithCredential, updatePassword,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDoc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc,
@@ -141,6 +142,60 @@ $("sair-admin").addEventListener("click", async function () {
 });
 
 $("ir-inicio").addEventListener("click", function () { mostrarSo("tela-inicio-admin"); });
+
+// ------------------------------------------------------------
+// 2b. TROCAR MINHA SENHA (sem depender de e-mail)
+// O Firebase só deixa trocar a senha de quem acabou de provar quem é.
+// Por isso pedimos a senha atual ("reautenticar") antes de gravar a nova:
+// se alguém achar o painel aberto num computador, não consegue trocar.
+// ------------------------------------------------------------
+function fecharTrocaDeSenha() {
+  $("form-trocar-senha").reset();
+  $("form-trocar-senha").hidden = true;
+  $("erro-senha").hidden = true;
+  $("abrir-trocar-senha").hidden = false;
+}
+
+$("abrir-trocar-senha").addEventListener("click", function () {
+  $("senha-trocada").hidden = true;
+  $("abrir-trocar-senha").hidden = true;
+  $("form-trocar-senha").hidden = false;
+  $("senha-atual").focus();
+});
+$("cancelar-trocar-senha").addEventListener("click", fecharTrocaDeSenha);
+
+$("form-trocar-senha").addEventListener("submit", async function (evento) {
+  evento.preventDefault();
+  const atual = $("senha-atual").value;
+  const nova = $("senha-nova").value;
+  const erro = $("erro-senha");
+  erro.hidden = true;
+
+  let problema = "";
+  if (!atual) problema = "Digite a sua senha atual.";
+  else if (nova.length < 10) problema = "A senha nova precisa ter pelo menos 10 caracteres.";
+  else if (nova !== $("senha-nova-2").value) problema = "As duas senhas novas não são iguais.";
+  else if (nova === atual) problema = "A senha nova precisa ser diferente da atual.";
+  if (problema) {
+    erro.textContent = problema;
+    erro.hidden = false;
+    return;
+  }
+
+  try {
+    const usuario = auth.currentUser;
+    await reauthenticateWithCredential(usuario, EmailAuthProvider.credential(usuario.email, atual));
+    await updatePassword(usuario, nova);
+    fecharTrocaDeSenha();
+    $("senha-trocada").hidden = false;
+  } catch (falha) {
+    const codigo = String(falha.code || "");
+    erro.textContent = codigo.includes("wrong-password") || codigo.includes("invalid-credential")
+      ? "A senha atual não confere."
+      : explicarErro(falha);
+    erro.hidden = false;
+  }
+});
 
 // O Firebase avisa sempre que alguém entra ou sai
 onAuthStateChanged(auth, async function (usuario) {

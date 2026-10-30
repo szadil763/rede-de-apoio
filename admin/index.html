@@ -53,6 +53,22 @@
         <small>Cadastrar e conferir locais e notícias, ver acessos</small></button>
       <a id="abrir-app" class="botao botao-grande botao-rosa" href="../src/" target="_blank" rel="noopener">Abrir o app
         <small>O app como as usuárias veem (abre em outra aba)</small></a>
+      <button type="button" id="abrir-trocar-senha" class="link-botao">Trocar minha senha</button>
+
+      <!-- Trocar a senha sem depender de e-mail (útil quando o e-mail da escola bloqueia o
+           "Esqueci a senha"). O Firebase exige a senha atual antes de aceitar a nova. -->
+      <form id="form-trocar-senha" class="trocar-senha" novalidate hidden>
+        <h3>Trocar minha senha</h3>
+        <label>Senha atual<input type="password" id="senha-atual" autocomplete="current-password" required></label>
+        <label>Senha nova (pelo menos 10 caracteres)<input type="password" id="senha-nova" autocomplete="new-password" minlength="10" required></label>
+        <label>Repita a senha nova<input type="password" id="senha-nova-2" autocomplete="new-password" required></label>
+        <div id="erro-senha" class="erros" role="alert" hidden></div>
+        <div class="botoes">
+          <button type="submit" class="botao">Salvar senha nova</button>
+          <button type="button" id="cancelar-trocar-senha" class="botao botao-claro">Cancelar</button>
+        </div>
+      </form>
+      <p id="senha-trocada" class="aviso" role="status" hidden>Pronto! Sua senha foi trocada. Use a nova da próxima vez que entrar.</p>
     </div>
   </section>
 
